@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fourth Down | NFL Predictor</title>
+<style>
+:root{--bg:#0b1118;--panel:#121c27;--line:#293849;--text:#edf3f8;--muted:#9aabba;--green:#5de0a0;--blue:#80b9ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,sans-serif}
+header{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;background:#0e151e}
+.brand{font-weight:850;letter-spacing:.08em}.brand span{color:var(--green)}.small{font-size:12px;color:var(--muted);font-weight:400;letter-spacing:0}
+main{max-width:980px;margin:0 auto;padding:24px 16px 50px}.intro h1{font-size:29px;margin:0 0 5px}.intro p{color:var(--muted);margin:0 0 20px}
+.tabs{display:flex;gap:8px;border-bottom:1px solid var(--line);margin-bottom:18px}.tab{padding:12px 15px;border:0;border-bottom:3px solid transparent;background:none;color:var(--muted);font:inherit;font-weight:700;cursor:pointer}.tab.active{color:var(--green);border-color:var(--green)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:15px}.panel h2{font-size:18px;margin:0 0 5px}.desc{color:var(--muted);font-size:13px;margin:0 0 16px}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}input,select{width:100%;background:#0a1118;border:1px solid #304153;color:var(--text);padding:10px;border-radius:8px;font:inherit;min-width:0}input:focus,select:focus{outline:1px solid var(--green);border-color:var(--green)}
+.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.field{min-width:0}.field.wide{grid-column:1/-1}.btn{padding:10px 14px;border-radius:9px;border:1px solid var(--line);background:#1a2836;color:var(--text);font-weight:750;cursor:pointer}.btn.primary{background:var(--green);color:#071b12;border-color:var(--green)}.btn.danger{color:#ffaaaa}.row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.teamlist{display:grid;gap:9px;margin-top:15px}.team{display:flex;justify-content:space-between;gap:12px;align-items:center;background:#0c141d;border:1px solid var(--line);padding:12px;border-radius:10px}.team strong{display:block}.team small{color:var(--muted)}.empty{color:var(--muted);padding:16px 0;font-size:13px}
+.result{display:grid;grid-template-columns:1fr 1fr;gap:12px}.scorebox{background:#0a1118;border:1px solid var(--line);padding:16px;border-radius:12px;text-align:center}.scorebox .name{font-size:13px;color:var(--muted)}.scorebox .score{font-size:42px;font-weight:850}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.stat{background:#0a1118;border:1px solid var(--line);border-radius:10px;padding:12px}.stat small{display:block;color:var(--muted)}.stat strong{font-size:21px}.notice{font-size:12px;color:var(--muted);margin-top:14px;padding:10px;border-left:2px solid var(--blue);background:#101d2a}.hidden{display:none!important}.tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line)}th{color:var(--muted)}
+@media(max-width:650px){.fields{grid-template-columns:repeat(2,minmax(0,1fr))}.stats{grid-template-columns:1fr 1fr}.intro h1{font-size:25px}}@media(max-width:420px){.fields{grid-template-columns:1fr}.field.wide{grid-column:auto}.stats{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header><div class="brand">FOURTH <span>DOWN</span><div class="small">Simple NFL Predictor</div></div><div class="small">Your stats · Your matchups</div></header>
+<main>
+<div class="intro"><h1>NFL Game Predictor</h1><p>Add your teams and stats once, then choose two teams and run the algorithm.</p></div>
+<nav class="tabs"><button class="tab active" data-tab="teams">1. Teams & Stats</button><button class="tab" data-tab="players">2. Players</button><button class="tab" data-tab="run">3. Run Algorithm</button></nav>
+
+<section id="teamsPage">
+<div class="panel">
+<h2>Add a team</h2><p class="desc">Enter the stats you want the algorithm to use. You can edit or delete teams below.</p>
+<form id="teamForm">
+<div class="fields">
+<div class="field wide"><label for="teamName">Team name</label><input id="teamName" placeholder="e.g. Philadelphia Eagles" required></div>
+<div class="field"><label for="pointsFor">Points scored / game</label><input id="pointsFor" type="number" min="0" max="60" step=".1" value="24" required></div>
+<div class="field"><label for="pointsAgainst">Points allowed / game</label><input id="pointsAgainst" type="number" min="0" max="60" step=".1" value="21" required></div>
+<div class="field"><label for="yardsFor">Yards gained / game</label><input id="yardsFor" type="number" min="0" max="800" step="1" value="350" required></div>
+<div class="field"><label for="yardsAgainst">Yards allowed / game</label><input id="yardsAgainst" type="number" min="0" max="800" step="1" value="330" required></div>
+<div class="field"><label for="turnovers">Turnover margin / game</label><input id="turnovers" type="number" min="-5" max="5" step=".1" value="0"></div>
+<div class="sectionlabel full">Efficiency & recent form</div>
+<div class="field"><label for="thirdDownOff">3rd-down conversion %</label><input id="thirdDownOff" type="number" min="0" max="100" step=".1" value="38"></div>
+<div class="field"><label for="thirdDownDef">Opponent 3rd-down % allowed</label><input id="thirdDownDef" type="number" min="0" max="100" step=".1" value="40"></div>
+<div class="field"><label for="redZoneOff">Red-zone TD %</label><input id="redZoneOff" type="number" min="0" max="100" step=".1" value="55"></div>
+<div class="field"><label for="redZoneDef">Red-zone TD % allowed</label><input id="redZoneDef" type="number" min="0" max="100" step=".1" value="58"></div>
+<div class="field"><label for="yardsPerPlay">Offensive yards / play</label><input id="yardsPerPlay" type="number" min="0" max="15" step=".1" value="5.5"></div>
+<div class="field"><label for="defYardsPerPlay">Defensive yards / play allowed</label><input id="defYardsPerPlay" type="number" min="0" max="15" step=".1" value="5.5"></div>
+<div class="field"><label for="sacksMade">Sacks made / game</label><input id="sacksMade" type="number" min="0" max="15" step=".1" value="2.5"></div>
+<div class="field"><label for="sacksAllowed">Sacks allowed / game</label><input id="sacksAllowed" type="number" min="0" max="15" step=".1" value="2.2"></div>
+<div class="field"><label for="recentPF">Points scored, last 3–5 games / game</label><input id="recentPF" type="number" min="0" max="60" step=".1" value="24"></div>
+<div class="field"><label for="recentPA">Points allowed, last 3–5 games / game</label><input id="recentPA" type="number" min="0" max="60" step=".1" value="21"></div>
+
+</div>
+<div class="row" style="margin-top:15px"><button class="btn primary" type="submit" id="saveTeamBtn">Add team</button><button class="btn" type="button" id="cancelEdit" hidden>Cancel edit</button></div>
+</form>
+</div>
+<div class="panel"><div class="row"><div><h2>Your teams</h2><p class="desc" style="margin:4px 0 0">Teams saved in this browser.</p></div><div class="row"><button class="btn primary" id="importTeamRankings" type="button">Import TeamRankings stats</button><button class="btn" id="loadExamples" type="button">Load examples</button></div></div><p class="desc" id="importStatus" style="margin-top:12px"></p><div id="teamList" class="teamlist"><div class="empty">No teams added yet. Add a team above or load the examples.</div></div></div>
+</section>
+
+<section id="playersPage" class="hidden">
+<div class="panel">
+<h2>Add a player</h2><p class="desc">Assign each player to one of your saved teams. Enter per-game averages plus workload and efficiency stats where available; the game results will show these saved player stats for whichever teams you select.</p>
+<form id="playerForm">
+<div class="fields">
+<div class="field"><label for="playerName">Player name</label><input id="playerName" placeholder="e.g. Player Name" required></div>
+<div class="field"><label for="playerTeam">Team</label><select id="playerTeam" required><option value="">Add teams first</option></select></div>
+<div class="field"><label for="playerPosition">Position</label><select id="playerPosition"><option>QB</option><option>RB</option><option>WR</option><option>TE</option><option>Other</option></select></div>
+<div class="field stat-field passing-field"><label for="passYds">Passing yards / game</label><input id="passYds" type="number" min="0" step=".1" value="0"></div>
+<div class="field stat-field passing-field"><label for="passTD">Passing TDs / game</label><input id="passTD" type="number" min="0" step=".1" value="0"></div>
+<div class="field stat-field rushing-field"><label for="rushYds">Rushing yards / game</label><input id="rushYds" type="number" min="0" step=".1" value="0"></div>
+<div class="field stat-field rushing-field"><label for="rushTD">Rushing TDs / game</label><input id="rushTD" type="number" min="0" step=".1" value="0"></div>
+<div class="field stat-field"><label for="receptions">Receptions / game</label><input id="receptions" type="number" min="0" step=".1" value="0"></div>
+<div class="field stat-field"><label for="recYds">Receiving yards / game</label><input id="recYds" type="number" min="0" step=".1" value="0"></div>
+<div class="field stat-field"><label for="recTD">Receiving TDs / game</label><input id="recTD" type="number" min="0" step=".1" value="0"></div>
+<div class="field stat-field"><label for="targets">Targets / game</label><input id="targets" type="number" min="0" step=".1" value="0"></div>
+<div class="field stat-field"><label for="carries">Carries / game</label><input id="carries" type="number" min="0" step=".1" value="0"></div>
+<div class="sectionlabel full">Workload & efficiency (enter 0 if unknown)</div>
+<div class="field stat-field qb-extra"><label for="passAttempts">Pass attempts / game</label><input id="passAttempts" type="number" min="0" step=".1" value="0"></div>
+<div class="field stat-field qb-extra"><label for="completionPct">Completion %</label><input id="completionPct" type="number" min="0" max="100" step=".1" value="0"></div>
+<div class="field stat-field qb-extra"><label for="yardsPerAttempt">Passing yards / attempt</label><input id="yardsPerAttempt" type="number" min="0" step=".1" value="0"></div>
+<div class="field stat-field qb-extra"><label for="interceptions">Interceptions / game</label><input id="interceptions" type="number" min="0" step=".1" value="0"></div>
+<div class="field stat-field qb-extra"><label for="sacksTaken">Sacks taken / game</label><input id="sacksTaken" type="number" min="0" step=".1" value="0"></div>
+<div class="field stat-field rb-extra"><label for="snapShare">Snap share %</label><input id="snapShare" type="number" min="0" max="100" step=".1" value="0"></div>
+<div class="field stat-field rb-extra"><label for="redZoneCarries">Red-zone carries / game</label><input id="redZoneCarries" type="number" min="0" step=".1" value="0"></div>
+<div class="field stat-field receiver-extra"><label for="targetShare">Target share %</label><input id="targetShare" type="number" min="0" max="100" step=".1" value="0"></div>
+<div class="field stat-field receiver-extra"><label for="catchRate">Catch rate %</label><input id="catchRate" type="number" min="0" max="100" step=".1" value="0"></div>
+<div class="field stat-field receiver-extra"><label for="yardsPerTarget">Receiving yards / target</label><input id="yardsPerTarget" type="number" min="0" step=".1" value="0"></div>
+<div class="field stat-field receiver-extra"><label for="receiverSnapShare">Snap share %</label><input id="receiverSnapShare" type="number" min="0" max="100" step=".1" value="0"></div>
+</div>
+<div class="row" style="margin-top:15px"><button class="btn primary" id="savePlayerBtn" type="submit">Add player</button><button class="btn" id="cancelPlayerEdit" type="button" hidden>Cancel edit</button></div>
+</form>
+</div>
+<div class="panel"><div class="row"><div><h2>Your players</h2><p class="desc" style="margin:4px 0 0">Saved in this browser and linked to a team.</p></div><span class="small" id="playerCount">0 players</span></div><div id="playerList" class="teamlist"><div class="empty">No players added yet.</div></div></div>
+</section>
+
+<section id="runPage" class="hidden">
+<div class="panel">
+<h2>Choose matchup</h2><p class="desc">Select two saved teams, enter the betting lines if you want, then run the algorithm.</p>
+<div class="fields">
+<div class="field"><label for="selectA">Team A</label><select id="selectA"><option value="">Add teams first</option></select></div>
+<div class="field"><label for="selectB">Team B</label><select id="selectB"><option value="">Add teams first</option></select></div>
+<div class="field"><label for="injuryA">Team A injury adjustment (points)</label><input id="injuryA" type="number" min="-20" max="20" step=".5" value="0"><div class="small">Use a negative value if injuries weaken Team A.</div></div>
+<div class="field"><label for="injuryB">Team B injury adjustment (points)</label><input id="injuryB" type="number" min="-20" max="20" step=".5" value="0"><div class="small">Use a negative value if injuries weaken Team B.</div></div>
+<div class="field"><label for="homeAdv">Home advantage for Team A (points)</label><input id="homeAdv" type="number" step=".5" value="1.5"></div>
+<div class="field"><label for="spread">Market spread for Team A</label><input id="spread" type="number" step=".5" value="-2.5"></div>
+<div class="field"><label for="totalLine">Market over/under</label><input id="totalLine" type="number" step=".5" value="44.5"></div>
+<div class="field"><label for="simCount">Number of simulations</label><select id="simCount"><option value="100">100 runs — quick</option><option value="1000" selected>1,000 runs</option><option value="5000">5,000 runs</option><option value="10000">10,000 runs</option><option value="50000">50,000 runs</option><option value="100000">100,000 runs</option></select></div>
+<div class="field"><label for="matchNote">Optional note</label><input id="matchNote" placeholder="e.g. Week 6"></div>
+</div>
+<button class="btn primary" id="runBtn" style="margin-top:15px">Run algorithm</button>
+</div>
+<div class="panel hidden" id="output">
+<div class="row"><div><h2>Prediction</h2><p class="desc" id="matchTitle" style="margin:4px 0 0"></p></div><span class="small">Model estimate</span></div>
+<div class="result" style="margin-top:15px"><div class="scorebox"><div class="name" id="resultNameA">Team A</div><div class="score" id="resultScoreA">—</div><div class="small">projected points</div></div><div class="scorebox"><div class="name" id="resultNameB">Team B</div><div class="score" id="resultScoreB">—</div><div class="small">projected points</div></div></div>
+<div class="stats"><div class="stat"><small>Team A win chance</small><strong id="winChance">—</strong></div><div class="stat"><small>Projected spread (A margin)</small><strong id="projectedSpread">—</strong></div><div class="stat"><small>Projected total</small><strong id="projectedTotal">—</strong></div><div class="stat"><small>Spread difference</small><strong id="spreadDiff">—</strong></div><div class="stat"><small>Total difference</small><strong id="totalDiff">—</strong></div><div class="stat"><small>Most likely lean</small><strong id="modelLean" style="font-size:16px">—</strong></div></div>
+<div class="notice" id="explanation"></div>
+</div>
+<div class="panel hidden" id="playerResults">
+<h2>Player stats for this matchup</h2>
+<p class="desc">Shows the saved per-game stats for players assigned to either selected team. These are entered averages, not yet individually simulated projections.</p>
+<div class="tablewrap"><table><thead><tr><th>Player</th><th>Team</th><th>Pos</th><th>Pass Yds</th><th>Pass TD</th><th>Rush Yds</th><th>Rush TD</th><th>Rec</th><th>Rec Yds</th><th>Rec TD</th></tr></thead><tbody id="playerResultsBody"><tr><td colspan="10" class="empty">Add players and run a matchup.</td></tr></tbody></table></div>
+</div>
+<div class="panel" id="propPanel">
+<h2>Player prop simulator</h2><p class="desc">Select a saved player, choose a prop line, and simulate outcomes using the stats you entered.</p>
+<div class="fields">
+<div class="field"><label for="propPlayer">Player</label><select id="propPlayer"><option value="">Run a matchup first</option></select></div>
+<div class="field"><label for="propType">Prop type</label><select id="propType"><option value="passYds">Passing yards</option><option value="passTD">Passing touchdowns</option><option value="rushYds">Rushing yards</option><option value="rushTD">Rushing touchdowns</option><option value="recYds">Receiving yards</option><option value="receptions">Receptions</option><option value="recTD">Receiving touchdowns</option><option value="rushRecYds">Rushing + receiving yards</option></select></div>
+<div class="field"><label for="propLine">Sportsbook line</label><input id="propLine" type="number" step=".5" value="49.5"></div>
+</div>
+<button class="btn primary" id="runPropBtn" type="button" style="margin-top:14px">Run player prop simulations</button>
+<div class="stats hidden" id="propOutput" style="margin-top:14px">
+<div class="stat"><small>Average simulated result</small><strong id="propAverage">—</strong></div>
+<div class="stat"><small>Over probability</small><strong id="propOver">—</strong></div>
+<div class="stat"><small>Under probability</small><strong id="propUnder">—</strong></div>
+</div>
+<div class="notice" id="propExplanation">Run a game matchup first, then choose a player and prop line.</div>
+</div>
+<div class="panel"><div class="row"><div><h2>Past predictions</h2><p class="desc" style="margin:4px 0 0">Saved locally on this device.</p></div><button class="btn" id="clearHistory">Clear history</button></div><div class="tablewrap" style="margin-top:10px"><table><thead><tr><th>Date</th><th>Matchup</th><th>Score</th><th>Win chance A</th><th>Runs</th><th>Lean</th></tr></thead><tbody id="history"><tr><td colspan="6" class="empty">No predictions saved yet.</td></tr></tbody></table></div></div>
+</section>
+<p class="small" style="text-align:center;margin-top:20px">Enter per-game stats consistently. Efficiency inputs are used as small matchup adjustments; player prop simulations are preliminary estimates, not a validated betting model. This site does not fetch live NFL stats.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);let teams=[];let editId=null;let latest=null;let players=[];let editPlayerId=null;
+try{players=JSON.parse(localStorage.getItem('fdPlayers')||'[]')}catch(e){players=[]}
+try{teams=JSON.parse(localStorage.getItem('fdTeams')||'[]')}catch(e){teams=[]}
+function persist(){try{localStorage.setItem('fdTeams',JSON.stringify(teams))}catch(e){}}
+function safe(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fieldsFromForm(){return {id:editId||('t'+Date.now()),name:$('teamName').value.trim(),pf:+$('pointsFor').value,pa:+$('pointsAgainst').value,yf:+$('yardsFor').value,ya:+$('yardsAgainst').value,to:+$('turnovers').value||0,tdo:+$('thirdDownOff').value||0,tdd:+$('thirdDownDef').value||0,rzo:+$('redZoneOff').value||0,rzd:+$('redZoneDef').value||0,ypp:+$('yardsPerPlay').value||0,dypp:+$('defYardsPerPlay').value||0,sm:+$('sacksMade').value||0,sa:+$('sacksAllowed').value||0,rpf:+$('recentPF').value||0,rpa:+$('recentPA').value||0}}
+function clearForm(){editId=null;$('teamForm').reset();$('pointsFor').value=24;$('pointsAgainst').value=21;$('yardsFor').value=350;$('yardsAgainst').value=330;$('turnovers').value=0;$('thirdDownOff').value=38;$('thirdDownDef').value=40;$('redZoneOff').value=55;$('redZoneDef').value=58;$('yardsPerPlay').value=5.5;$('defYardsPerPlay').value=5.5;$('sacksMade').value=2.5;$('sacksAllowed').value=2.2;$('recentPF').value=24;$('recentPA').value=21;$('saveTeamBtn').textContent='Add team';$('cancelEdit').hidden=true}
+function renderTeams(){const list=$('teamList');if(!teams.length){list.innerHTML='<div class="empty">No teams added yet. Add a team above or load the examples.</div>'}else{list.innerHTML=teams.map(t=>`<div class="team"><div><strong>${safe(t.name)}</strong><small>PF ${t.pf} · PA ${t.pa} · Yards ${t.yf} · Turnover margin ${t.to} · Yds/play ${t.ypp??'—'} · 3rd down ${t.tdo??'—'}%</small></div><div class="row"><button class="btn" data-edit="${t.id}">Edit</button><button class="btn danger" data-delete="${t.id}">Delete</button></div></div>`).join('')}renderSelects()}
+function renderSelects(){const options=teams.map(t=>`<option value="${safe(t.id)}">${safe(t.name)}</option>`).join('');const a=$('selectA').value,b=$('selectB').value;$('selectA').innerHTML=options||'<option value="">Add teams first</option>';$('selectB').innerHTML=options||'<option value="">Add teams first</option>';if(teams.some(t=>t.id===a))$('selectA').value=a;if(teams.some(t=>t.id===b))$('selectB').value=b;if(!$('selectA').value&&teams[0])$('selectA').value=teams[0].id;if(!$('selectB').value&&teams[1])$('selectB').value=teams[1].id;const ps=$('playerTeam'),oldTeam=ps.value;ps.innerHTML=teams.map(t=>`<option value="${safe(t.id)}">${safe(t.name)}</option>`).join('')||'<option value="">Add teams first</option>';if(teams.some(t=>t.id===oldTeam))ps.value=oldTeam}
+$('teamForm').addEventListener('submit',e=>{e.preventDefault();const t=fieldsFromForm();if(!t.name)return;const ix=teams.findIndex(x=>x.id===t.id);if(ix>=0)teams[ix]=t;else teams.push(t);persist();renderTeams();clearForm()});
+$('cancelEdit').addEventListener('click',clearForm);
+$('teamList').addEventListener('click',e=>{const edit=e.target.dataset.edit,del=e.target.dataset.delete;if(edit){const t=teams.find(x=>x.id===edit);if(!t)return;editId=t.id;$('teamName').value=t.name;$('pointsFor').value=t.pf;$('pointsAgainst').value=t.pa;$('yardsFor').value=t.yf;$('yardsAgainst').value=t.ya;$('turnovers').value=t.to;$('thirdDownOff').value=t.tdo??38;$('thirdDownDef').value=t.tdd??40;$('redZoneOff').value=t.rzo??55;$('redZoneDef').value=t.rzd??58;$('yardsPerPlay').value=t.ypp??5.5;$('defYardsPerPlay').value=t.dypp??5.5;$('sacksMade').value=t.sm??2.5;$('sacksAllowed').value=t.sa??2.2;$('recentPF').value=t.rpf??t.pf;$('recentPA').value=t.rpa??t.pa;$('saveTeamBtn').textContent='Save changes';$('cancelEdit').hidden=false;window.scrollTo({top:0,behavior:'smooth'})}if(del){teams=teams.filter(x=>x.id!==del);players=players.filter(x=>x.teamId!==del);persist();persistPlayers();renderTeams();renderPlayers();$('output').classList.add('hidden')}});
+document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===btn));$('teamsPage').classList.toggle('hidden',btn.dataset.tab!=='teams');$('playersPage').classList.toggle('hidden',btn.dataset.tab!=='players');$('runPage').classList.toggle('hidden',btn.dataset.tab!=='run');if(btn.dataset.tab==='players')renderPlayers()}));
+$('importTeamRankings').addEventListener('click',async()=>{const btn=$('importTeamRankings'),status=$('importStatus');btn.disabled=true;btn.textContent='Importing…';status.textContent='Fetching current team stats from TeamRankings. This may take a little while.';try{const res=await fetch('/api/team-stats');const data=await res.json();if(!res.ok||!data.teams)throw new Error(data.error||'Could not retrieve stats.');let added=0,updated=0;for(const raw of data.teams){const key=raw.name.toLowerCase();let t=teams.find(x=>x.name.toLowerCase()===key||raw.aliases?.some(a=>x.name.toLowerCase()===a.toLowerCase()));const fields={pf:raw.pf,pa:raw.pa,yf:raw.yf,ya:raw.ya,to:raw.to,tdo:raw.tdo,tdd:raw.tdd,rzo:raw.rzo,rzd:raw.rzd,ypp:raw.ypp,dypp:raw.dypp,sm:raw.sm,sa:raw.sa,rpf:raw.rpf,rpa:raw.rpa};if(t){Object.entries(fields).forEach(([k,v])=>{if(v!==null&&v!==undefined)t[k]=v});updated++}else{teams.push({id:'tr-'+raw.slug,name:raw.name,...fields});added++}}persist();renderTeams();status.textContent=`Imported TeamRankings stats for ${data.teams.length} teams. Added ${added}, updated ${updated}. Source data timestamp: ${new Date(data.fetched_at).toLocaleString()}.`; }catch(err){status.textContent='Import failed: '+err.message+'. Make sure you are opening Fourth Down through the backend server, not by double-clicking the HTML file.'}finally{btn.disabled=false;btn.textContent='Import TeamRankings stats'}});
+$('loadExamples').addEventListener('click',()=>{if(teams.length&&!confirm('Add example teams to your existing list?'))return;const examples=[{id:'exKC',name:'Kansas City Chiefs',pf:25.4,pa:19.2,yf:355,ya:315,to:.4,tdo:43,tdd:37,rzo:62,rzd:52,ypp:5.8,dypp:5.1,sm:2.8,sa:1.8,rpf:26,rpa:18},{id:'exBUF',name:'Buffalo Bills',pf:27.1,pa:21.5,yf:375,ya:330,to:.2,tdo:44,tdd:39,rzo:60,rzd:57,ypp:5.9,dypp:5.4,sm:2.6,sa:2.1,rpf:28,rpa:22},{id:'exPHI',name:'Philadelphia Eagles',pf:26.2,pa:20.1,yf:365,ya:320,to:.3,tdo:45,tdd:38,rzo:65,rzd:55,ypp:5.7,dypp:5.2,sm:3.1,sa:1.9,rpf:27,rpa:19}];examples.forEach(x=>{if(!teams.some(t=>t.name===x.name))teams.push(x)});persist();renderTeams()});
+function persistPlayers(){try{localStorage.setItem('fdPlayers',JSON.stringify(players))}catch(e){}}
+function updatePlayerStatFields(){
+ const pos=$('playerPosition').value;
+ document.querySelectorAll('.passing-field').forEach(el=>el.classList.toggle('hidden',pos!=='QB'));
+ // Only show role-relevant fields for cleaner entry forms.
+ const fieldMap={
+  QB:['passYds','passTD','rushYds','rushTD','passAttempts','completionPct','yardsPerAttempt','interceptions','sacksTaken'],
+  RB:['rushYds','rushTD','receptions','recYds','recTD','targets','carries','snapShare','redZoneCarries','targetShare','catchRate','yardsPerTarget','receiverSnapShare'],
+  WR:['receptions','recYds','recTD','targets','targetShare','catchRate','yardsPerTarget','receiverSnapShare'],
+  TE:['receptions','recYds','recTD','targets','targetShare','catchRate','yardsPerTarget','receiverSnapShare'],
+  Other:['passYds','passTD','rushYds','rushTD','receptions','recYds','recTD','targets','carries','passAttempts','completionPct','yardsPerAttempt','interceptions','sacksTaken','snapShare','redZoneCarries','targetShare','catchRate','yardsPerTarget','receiverSnapShare']
+ };
+ document.querySelectorAll('#playerForm .stat-field').forEach(el=>el.classList.add('hidden'));
+ const allowed=fieldMap[pos]||fieldMap.Other;
+ allowed.forEach(id=>$(id).closest('.field').classList.remove('hidden'));
+ document.querySelectorAll('.qb-extra').forEach(el=>el.classList.toggle('hidden',pos!=='QB'));
+ document.querySelectorAll('.rb-extra').forEach(el=>el.classList.toggle('hidden',pos!=='RB'));
+ document.querySelectorAll('.receiver-extra').forEach(el=>el.classList.toggle('hidden',!['RB','WR','TE'].includes(pos)));
+}
+$('playerPosition').addEventListener('change',updatePlayerStatFields);
+function playerFromForm(){return {id:editPlayerId||('p'+Date.now()),name:$('playerName').value.trim(),teamId:$('playerTeam').value,pos:$('playerPosition').value,passYds:+$('passYds').value||0,passTD:+$('passTD').value||0,rushYds:+$('rushYds').value||0,rushTD:+$('rushTD').value||0,receptions:+$('receptions').value||0,recYds:+$('recYds').value||0,recTD:+$('recTD').value||0,targets:+$('targets').value||0,carries:+$('carries').value||0,passAttempts:+$('passAttempts').value||0,completionPct:+$('completionPct').value||0,yardsPerAttempt:+$('yardsPerAttempt').value||0,interceptions:+$('interceptions').value||0,sacksTaken:+$('sacksTaken').value||0,snapShare:+$('snapShare').value||0,redZoneCarries:+$('redZoneCarries').value||0,targetShare:+$('targetShare').value||0,catchRate:+$('catchRate').value||0,yardsPerTarget:+$('yardsPerTarget').value||0,receiverSnapShare:+$('receiverSnapShare').value||0}}
+function clearPlayerForm(){editPlayerId=null;$('playerForm').reset();['passYds','passTD','rushYds','rushTD','receptions','recYds','recTD','targets','carries','passAttempts','completionPct','yardsPerAttempt','interceptions','sacksTaken','snapShare','redZoneCarries','targetShare','catchRate','yardsPerTarget','receiverSnapShare'].forEach(id=>$(id).value=0);$('savePlayerBtn').textContent='Add player';$('cancelPlayerEdit').hidden=true;renderSelects()}
+function renderPlayers(){const list=$('playerList');$('playerCount').textContent=players.length+' player'+(players.length===1?'':'s');if(!players.length){list.innerHTML='<div class="empty">No players added yet. Add your teams first, then add players here.</div>';return}list.innerHTML=players.map(p=>{const t=teams.find(x=>x.id===p.teamId);return `<div class="team"><div><strong>${safe(p.name)} <span class="small">· ${safe(p.pos)}</span></strong><small>${safe(t?t.name:'Team not found')} · Pass ${p.passYds} yds · Rush ${p.rushYds} yds · Rec ${p.receptions} / ${p.recYds} yds</small></div><div class="row"><button class="btn" data-pedit="${p.id}">Edit</button><button class="btn danger" data-pdelete="${p.id}">Delete</button></div></div>`}).join('')}
+$('playerForm').addEventListener('submit',e=>{e.preventDefault();const p=playerFromForm();if(!p.name||!p.teamId){alert('Add a team first and select a team for this player.');return}const ix=players.findIndex(x=>x.id===p.id);if(ix>=0)players[ix]=p;else players.push(p);persistPlayers();renderPlayers();clearPlayerForm()});
+$('cancelPlayerEdit').addEventListener('click',clearPlayerForm);
+$('playerList').addEventListener('click',e=>{const eid=e.target.dataset.pedit,did=e.target.dataset.pdelete;if(eid){const p=players.find(x=>x.id===eid);if(!p)return;editPlayerId=p.id;$('playerName').value=p.name;$('playerTeam').value=p.teamId;$('playerPosition').value=p.pos;updatePlayerStatFields();[['passYds','passYds'],['passTD','passTD'],['rushYds','rushYds'],['rushTD','rushTD'],['receptions','receptions'],['recYds','recYds'],['recTD','recTD'],['targets','targets'],['carries','carries'],['passAttempts','passAttempts'],['completionPct','completionPct'],['yardsPerAttempt','yardsPerAttempt'],['interceptions','interceptions'],['sacksTaken','sacksTaken'],['snapShare','snapShare'],['redZoneCarries','redZoneCarries'],['targetShare','targetShare'],['catchRate','catchRate'],['yardsPerTarget','yardsPerTarget'],['receiverSnapShare','receiverSnapShare']].forEach(([id,k])=>$(id).value=p[k]||0);$('savePlayerBtn').textContent='Save changes';$('cancelPlayerEdit').hidden=false;window.scrollTo({top:0,behavior:'smooth'})}if(did){players=players.filter(x=>x.id!==did);persistPlayers();renderPlayers()}});
+function renderMatchPlayers(aId,bId){const matches=players.filter(p=>p.teamId===aId||p.teamId===bId);$('playerResults').classList.remove('hidden');$('playerResultsBody').innerHTML=matches.length?matches.map(p=>{const t=teams.find(x=>x.id===p.teamId);return `<tr><td>${safe(p.name)}</td><td>${safe(t?t.name:'')}</td><td>${safe(p.pos)}</td><td>${p.passYds||0}</td><td>${p.passTD||0}</td><td>${p.rushYds||0}</td><td>${p.rushTD||0}</td><td>${p.receptions||0}</td><td>${p.recYds||0}</td><td>${p.recTD||0}</td></tr>`}).join(''):'<tr><td colspan="10" class="empty">No players are saved for these teams yet. Add them in the Players tab.</td></tr>';const old=$('propPlayer').value;$('propPlayer').innerHTML=matches.map(p=>`<option value="${safe(p.id)}">${safe(p.name)} (${safe(p.pos)})</option>`).join('')||'<option value="">No saved players for this matchup</option>';if(matches.some(p=>p.id===old))$('propPlayer').value=old;$('propOutput').classList.add('hidden');$('propExplanation').textContent=matches.length?'Select a player and prop line, then run simulations.':'Add players to these teams first.'}
+function erf(x){const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+.3275911*x);return s*(1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-x*x))}
+function fmt(n){return (Math.round(n*10)/10).toFixed(1)}
+function calculate(){const a=teams.find(t=>t.id===$('selectA').value),b=teams.find(t=>t.id===$('selectB').value);if(!a||!b){alert('Add at least two teams, then select a matchup.');return}if(a.id===b.id){alert('Choose two different teams.');return}
+const home=+$('homeAdv').value||0,spread=+$('spread').value||0,totalLine=+$('totalLine').value||0,N=+$('simCount').value||1000;
+// Expected points come from the entered team stats. Simulations add random scoring variation
+// (a simplified model, not trained on historical play-by-play).
+const recentA=(a.rpf??a.pf),recentB=(b.rpf??b.pf),recentDefA=(a.rpa??a.pa),recentDefB=(b.rpa??b.pa);
+let meanA=(a.pf+b.pa)/2+((recentA-a.pf)+(recentDefB-b.pa))/2*.20+Math.max(-3,Math.min(3,(a.yf-b.ya)/100))*.25+Math.max(-1.5,Math.min(1.5,((a.ypp??5.5)-(b.dypp??5.5))*.7))*.45+Math.max(-1.2,Math.min(1.2,((a.tdo??38)-(b.tdd??40))/10))*.25+Math.max(-1.2,Math.min(1.2,((a.rzo??55)-(b.rzd??58))/10))*.25+(a.to??0)*1.0+Math.max(-1,Math.min(1,((b.sm??2.5)-(a.sa??2.2))*.25))+(+$('injuryA').value||0)+home/2;
+let meanB=(b.pf+a.pa)/2+((recentB-b.pf)+(recentDefA-a.pa))/2*.20+Math.max(-3,Math.min(3,(b.yf-a.ya)/100))*.25+Math.max(-1.5,Math.min(1.5,((b.ypp??5.5)-(a.dypp??5.5))*.7))*.45+Math.max(-1.2,Math.min(1.2,((b.tdo??38)-(a.tdd??40))/10))*.25+Math.max(-1.2,Math.min(1.2,((b.rzo??55)-(a.rzd??58))/10))*.25+(b.to??0)*1.0+Math.max(-1,Math.min(1,((a.sm??2.5)-(b.sa??2.2))*.25))+(+$('injuryB').value||0)-home/2;
+meanA=Math.max(0,Math.min(60,meanA));meanB=Math.max(0,Math.min(60,meanB));
+const samples=[];let winsA=0,winsB=0,ties=0,sumA=0,sumB=0,sumTotal=0,sumMargin=0,coverA=0,coverB=0,over=0,under=0,pushTotal=0;
+function normal(){let u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+for(let i=0;i<N;i++){let pa=Math.max(0,Math.round(meanA+normal()*7.5)),pb=Math.max(0,Math.round(meanB+normal()*7.5));sumA+=pa;sumB+=pb;sumTotal+=pa+pb;sumMargin+=pa-pb;if(pa>pb)winsA++;else if(pb>pa)winsB++;else ties++;if(pa-pb+spread>0)coverA++;else if(pa-pb+spread<0)coverB++;if(pa+pb>totalLine)over++;else if(pa+pb<totalLine)under++;else pushTotal++;samples.push({pa,pb,margin:pa-pb,total:pa+pb})}
+samples.sort((x,y)=>x.margin-y.margin);const median=samples[Math.floor(N/2)];const avgA=sumA/N,avgB=sumB/N,avgMargin=sumMargin/N,avgTotal=sumTotal/N;const win=(winsA+ties*.5)/N;const coverPct=coverA/N,overPct=over/N;const lean=Math.abs(coverPct-.5)>=.04?(coverPct>.5?a.name+' spread':b.name+' spread'):Math.abs(overPct-.5)>=.04?(overPct>.5?'Over':'Under'):'No strong lean';
+latest={date:new Date().toLocaleDateString(),a:a.name,b:b.name,pa:avgA,pb:avgB,win,lean,note:$('matchNote').value,N,winsA,winsB,ties,coverA,coverB,over,under,pushTotal,avgTotal,avgMargin};
+$('output').classList.remove('hidden');renderMatchPlayers(a.id,b.id);$('matchTitle').textContent=a.name+' vs '+b.name+($('matchNote').value?' · '+$('matchNote').value:'');$('resultNameA').textContent=a.name;$('resultNameB').textContent=b.name;$('resultScoreA').textContent=fmt(avgA);$('resultScoreB').textContent=fmt(avgB);$('winChance').textContent=Math.round(win*100)+'%';$('projectedSpread').textContent=(avgMargin>0?'+':'')+fmt(avgMargin);$('projectedTotal').textContent=fmt(avgTotal);$('spreadDiff').textContent=Math.round(coverPct*100)+'% cover A';$('totalDiff').textContent=Math.round(overPct*100)+'% over';$('modelLean').textContent=lean;$('explanation').textContent=`Ran ${N.toLocaleString()} simulated games. Average simulated score: ${a.name} ${fmt(avgA)} – ${b.name} ${fmt(avgB)}. ${a.name} won ${Math.round(winsA/N*100)}% of runs; ${b.name} won ${Math.round(winsB/N*100)}%; ties ${Math.round(ties/N*100)}%. Team A covered the entered spread in ${Math.round(coverPct*100)}% of simulations; the total went over in ${Math.round(overPct*100)}%. Scores are simulated using a simple random-variation assumption, not a trained or validated model. More runs reduce simulation noise, but do not fix inaccurate inputs or formula assumptions.`;
+}
+function propMean(p,type){if(type==='rushRecYds')return (p.rushYds||0)+(p.recYds||0);return Math.max(0,p[type]||0)}
+function updatePropOptions(){const p=players.find(x=>x.id===$('propPlayer').value);if(!p)return;const allowed={QB:['passYds','passTD','rushYds','rushTD'],RB:['rushYds','rushTD','receptions','recYds','recTD','rushRecYds'],WR:['receptions','recYds','recTD','rushRecYds'],TE:['receptions','recYds','recTD','rushRecYds'],Other:['passYds','passTD','rushYds','rushTD','receptions','recYds','recTD','rushRecYds']}[p.pos]||[];const labels={passYds:'Passing yards',passTD:'Passing touchdowns',rushYds:'Rushing yards',rushTD:'Rushing touchdowns',recYds:'Receiving yards',receptions:'Receptions',recTD:'Receiving touchdowns',rushRecYds:'Rushing + receiving yards'};const current=$('propType').value;$('propType').innerHTML=allowed.map(v=>`<option value="${v}">${labels[v]}</option>`).join('');if(allowed.includes(current))$('propType').value=current}
+$('propPlayer').addEventListener('change',updatePropOptions);
+$('runPropBtn').addEventListener('click',()=>{const p=players.find(x=>x.id===$('propPlayer').value);if(!p){alert('Add a player to one of the selected teams first.');return}updatePropOptions();const type=$('propType').value,line=+$('propLine').value,N=+$('simCount').value||1000,mean=propMean(p,type);let sd=type.toLowerCase().includes('td')?Math.max(.65,Math.sqrt(mean+0.25)):type==='receptions'?Math.max(1.2,Math.sqrt(mean+1)):Math.max(3,mean*.28);if(type==='passYds')sd=Math.max(25,mean*.22);if(type==='rushYds'||type==='recYds'||type==='rushRecYds')sd=Math.max(10,mean*.30);let over=0,under=0,push=0,sum=0;function normalProp(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}for(let i=0;i<N;i++){let value=Math.max(0,mean+normalProp()*sd);if(type.toLowerCase().includes('td')||type==='receptions')value=Math.round(value);sum+=value;if(value>line)over++;else if(value<line)under++;else push++}$('propOutput').classList.remove('hidden');$('propAverage').textContent=fmt(sum/N);$('propOver').textContent=Math.round(over/N*100)+'%';$('propUnder').textContent=Math.round(under/N*100)+'%';$('propExplanation').textContent=`Simulated ${N.toLocaleString()} outcomes for ${p.name}. The average is based on the per-game stats you entered, with a simplified random-variation assumption. These are preliminary estimates, not a validated player-prop model; workload, opponent matchup and game context are not fully modeled yet.`});
+$('runBtn').addEventListener('click',calculate);
+function getHistory(){try{return JSON.parse(localStorage.getItem('fdHistory')||'[]')}catch(e){return []}}
+function renderHistory(){const h=getHistory();$('history').innerHTML=h.length?h.slice().reverse().map(x=>`<tr><td>${safe(x.date)}</td><td>${safe(x.a)} vs ${safe(x.b)}</td><td>${Math.round(x.pa)}–${Math.round(x.pb)}</td><td>${Math.round(x.win*100)}%</td><td>${(x.N||1).toLocaleString()}</td><td>${safe(x.lean)}</td></tr>`).join(''):'<tr><td colspan="6" class="empty">No predictions saved yet.</td></tr>'}
+$('runBtn').addEventListener('click',()=>{if(latest){const h=getHistory();h.push(latest);try{localStorage.setItem('fdHistory',JSON.stringify(h.slice(-100)))}catch(e){}renderHistory()}});
+$('clearHistory').addEventListener('click',()=>{if(confirm('Delete all saved predictions?')){localStorage.removeItem('fdHistory');renderHistory()}});
+renderTeams();renderPlayers();updatePlayerStatFields();renderHistory();
+</script>
+</body></html>
